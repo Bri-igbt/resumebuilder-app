@@ -1,5 +1,5 @@
 import express from 'express';
-import cos from 'cors';
+import cors from 'cors';
 import "dotenv/config";
 import connectDB from "./configs/db.js";
 import userRouter from "./routes/userRoutes.js";
@@ -13,7 +13,11 @@ const port = process.env.PORT || 3000;
 await connectDB();
 
 app.use(express.json());
-app.use(cos());
+app.use(cors({
+    origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080'], // Common frontend ports
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}));
 
 app.get('/', (req, res) => res.send('Server is running'));
 app.use('/api/users', userRouter );

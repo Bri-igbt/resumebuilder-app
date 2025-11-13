@@ -15,7 +15,7 @@ export const createResume = async (req, res) => {
     } catch (error) {
         return res.status(400).json({ message: error.message });
     }
-};
+}
 
 //controller for deleting a resume
 //DELETE: /api/resumes/delete

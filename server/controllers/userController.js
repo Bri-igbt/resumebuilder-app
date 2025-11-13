@@ -29,13 +29,13 @@ export const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'Password must be at least 6 characters long' });
         }
 
-        // Check if user already exists
+        // Check if a user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(409).json({ message: 'User already exists' });
         }
 
-        // Create new user
+        // Create a new user
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = await User.create({
             name,

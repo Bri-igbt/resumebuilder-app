@@ -5,15 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a9aa4e72-cc1a-4ae5-af8f-15d646891feb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/client/.env" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/src/app/features/authSlice.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/src/app/store.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/client" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/configs/api.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client" beforeDir="false" afterPath="$PROJECT_DIR$/client" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/.env" beforeDir="false" afterPath="$PROJECT_DIR$/client/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/client/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/app/store.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/app/store.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/components/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/Navbar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/components/home/Hero.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/home/Hero.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/main.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/pages/Layout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/pages/Layout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/pages/Dashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/pages/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/pages/Login.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/server/controllers/resumeController.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/server/controllers/resumeController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/server/controllers/userController.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/server/controllers/userController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/server/middlewares/authMiddlewares.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/server/middlewares/authMiddlewares.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/server/routes/userRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/server/routes/userRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/server/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/server/server.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,7 +52,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Merging main&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -53,6 +65,11 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/server/controllers" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -68,7 +85,7 @@
       <option name="presentableId" value="Default" />
       <updated>1761899100575</updated>
       <workItem from="1761899102782" duration="97114000" />
-      <workItem from="1762636424426" duration="35230000" />
+      <workItem from="1762636424426" duration="49653000" />
     </task>
     <servers />
   </component>
@@ -84,7 +101,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/client/src/pages/Dashboard.jsx</url>
-          <line>243</line>
+          <line>257</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -98,6 +115,12 @@
           <line>37</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/client/src/pages/Dashboard.jsx</url>
+          <line>239</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
