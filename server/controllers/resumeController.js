@@ -19,7 +19,7 @@ export const createResume = async (req, res) => {
 
 //controller for deleting a resume
 //DELETE: /api/resumes/delete
-export const deleteResume = async (res, req) => {
+export const deleteResume = async (req, res) => {
     try {
         const userId = req.userId;
         const {resumeId} = req.params;

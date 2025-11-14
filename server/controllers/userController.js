@@ -135,14 +135,18 @@ export const getUserById = async (req, res) => {
 //controller for getting user resume
 //GET: /api/users/resumes
 
-export const getUserResumes = async (res, req) => {
+export const getUserResumes = async (req, res) => {
     try {
         const userId = req.userId;
 
-        //return user resumes
-        const resumes = await Resume.find({userId});
-        return res.status(200).json({resumes});
+        if (!userId) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+
+        // Return user resumes
+        const resumes = await Resume.find({ userId }).sort({ createdAt: -1 });
+        return res.status(200).json({ resumes });
     } catch (error) {
-        return res.status(400).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 }

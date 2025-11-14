@@ -69,57 +69,70 @@ export const enhanceJobDescription = async (res, req) => {
 
 //controller for uploading a resume's to the database
 //POST: /api/ai/upload-resume
-export const uploadResume = async (res, req) => {
+export const uploadResume = async (req, res) => {
     try {
         const { resumeText, title } = req.body;
         const userId = req.userId;
 
-        if (!resumeText) {
-            return res.status(400).json({ message: 'Missing required fields' });
+        // Validate required fields
+        if (!resumeText || !title) {
+            return res.status(400).json({
+                message: 'Missing required fields: resumeText and title are required'
+            });
         }
-        const systemPrompt = 'You are an expert AI Agent to extract data from resume.'
+
+        if (!userId) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+
+        const systemPrompt = 'You are an expert AI Agent to extract data from resume.';
 
         const userPrompt = `Extract the following data from the resume: ${resumeText}
-            Provide data in the following JSON format with no additional text before or after:
-            
-            {
-                professional_summary: { type: String, default: '' },
-                skill: { type: String },
-                personal_info: {
-                    image: { type: String, default: '' },
-                    full_name: { type: String, default: '' },
-                    profession: { type: String, default: '' },
-                    email: { type: String, default: '' },
-                    phone: { type: String, default: '' },
-                    location: { type: String, default: '' },
-                    linkedin: { type: String, default: '' },
-                    website: { type: String, default: '' },
-                },
-                experience: [{
-                    company: { type: String },
-                    position: { type: String },
-                    start_date: { type: String },
-                    end_date: { type: String },
-                    description: { type: String },
-                    is_current: { type: Boolean },
-                }],
-                project: [{
-                    name: { type: String },
-                    type: { type: String },
-                    description: { type: String },
-                }],
-                education: [{
-                    institution: { type: String },
-                    degree: { type: String },
-                    field: { type: String },
-                    graduation_date: { type: String },
-                    gpa: { type: String },
-                }]
-            }
-            
-        `
+        Provide data in the following JSON format with no additional text before or after:
+        
+        {
+            "professional_summary": "",
+            "skills": "",
+            "personal_info": {
+                "image": "",
+                "full_name": "",
+                "profession": "",
+                "email": "",
+                "phone": "",
+                "location": "",
+                "linkedin": "",
+                "website": ""
+            },
+            "experience": [
+                {
+                    "company": "",
+                    "position": "",
+                    "start_date": "",
+                    "end_date": "",
+                    "description": "",
+                    "is_current": false
+                }
+            ],
+            "projects": [
+                {
+                    "name": "",
+                    "type": "",
+                    "description": ""
+                }
+            ],
+            "education": [
+                {
+                    "institution": "",
+                    "degree": "",
+                    "field": "",
+                    "graduation_date": "",
+                    "gpa": ""
+                }
+            ]
+        }`;
+
         const response = await ai.chat.completions.create({
-            model: process.env.OPENAI_MODEL,
+            model: process.env.OPENAI_MODEL || "gpt-3.5-turbo",
             messages: [
                 {
                     role: "system",
@@ -127,18 +140,46 @@ export const uploadResume = async (res, req) => {
                 },
                 {
                     role: "user",
-                    content:userPrompt,
+                    content: userPrompt,
                 },
             ],
             response_format: { type: 'json_object' }
-        })
+        });
+
         const extractData = response.choices[0].message.content.trim();
-        const parsedData = JSON.parse(extractData);
-        const newResume = await Resume.create({ userId, ...parsedData, title });
-        res.json({ resumeId: newResume._id });
+        let parsedData;
+        try {
+            parsedData = JSON.parse(extractData);
+        } catch (parseError) {
+            return res.status(500).json({
+                message: 'Failed to parse AI response as JSON'
+            });
+        }
+
+        // Create a résumé with the extracted data
+        const newResume = await Resume.create({
+            userId,
+            ...parsedData,
+            title
+        });
+
+        res.status(201).json({
+            message: 'Resume uploaded successfully',
+            resumeId: newResume._id
+        });
 
     } catch (error) {
-        return res.status(400).json({ message: error.message });
-    }
-}
+        console.error('Upload resume error:', error);
 
+        // More specific error handling
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({
+                message: 'Validation error: ' + error.message
+            });
+        }
+
+        res.status(500).json({
+            message: 'Internal server error: ' + error.message
+        });
+    }
+};
