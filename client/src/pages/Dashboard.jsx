@@ -9,9 +9,8 @@ import {
     XIcon
 } from "lucide-react";
 import {useEffect, useState} from "react";
-import {dummyResumeData} from "../assets/assets.js";
-import {data, useNavigate} from "react-router-dom";
-import {useSelector} from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import api from "../configs/api.js";
 import toast from "react-hot-toast";
 import pdfToText from "react-pdftotext";
@@ -73,7 +72,18 @@ const Dashboard = () => {
     }
 
     const editTitle = async (e) => {
-        e.preventDefault();
+        try {
+            e.preventDefault();
+            const { data } = await api.put(`/api/resumes/update`, {resumeId: editResumeId, resumeData: {title}}, {headers: {Authorization: `Bearer ${token}`}})
+            setAllResumes(allResumes.map(resume => (resume._id === editResumeId ? {...resume, title} : resume)))
+            setTitle('')
+            setEditResumeId('')
+            toast.success(data.message)
+        } catch (error) {
+            toast.error(error?.response?.data?.message || error.message)
+        } finally {
+            setEditResumeId('')
+        }
     }
     const deleteResume = async (resumeId) => {
         try {
@@ -90,7 +100,7 @@ const Dashboard = () => {
     }
 
     useEffect(() => {
-        loadAllResumes()
+        loadAllResumes().then(r => r.json());
     }, [])
 
     return (
@@ -246,9 +256,9 @@ const Dashboard = () => {
                                 />
                             </div>
 
-                            <button className='w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors'>
+                            <button disabled={isLoading} className='w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex justify-center items-center gap-2 '>
                                 {isLoading && <LoaderCircleIcon className='text-white size-4 animate-spin'/>}
-                                {!isLoading ? 'Uploading' : 'Upload Resume'}
+                                {isLoading ? 'Uploading' : 'Upload Resume'}
                             </button>
 
                             <XIcon

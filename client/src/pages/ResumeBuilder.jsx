@@ -21,9 +21,13 @@ import ExperienceForm from "../components/ExperienceForm.jsx";
 import EducationForm from "../components/EducationForm.jsx";
 import ProjectForm from "../components/ProjectForm.jsx";
 import SkillsForm from "../components/SkillsForm.jsx";
+import {useSelector} from "react-redux";
+import api from "../configs/api.js";
+import toast from "react-hot-toast";
 
 const ResumeBuilder = () => {
     const { resumeId } = useParams()
+    const { token } = useSelector(state => state.auth)
     const [activeSectionIndex, setActiveSectionIndex] = useState(0)
     const [removeBackground, setRemoveBackground] = useState(false);
 
@@ -42,10 +46,19 @@ const ResumeBuilder = () => {
     });
 
     const loadExistingResume = async () => {
-        const resume = dummyResumeData.find(resume => resume._id === resumeId)
-        if(resume) {
-            setResumeData(resume)
-            document.title = resume.title + " | Resume Builder"
+        try {
+            const { data } = await api.get(`/api/resumes/get/${resumeId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if(data.resume) {
+                setResumeData(data.resume)
+                document.title = data.resume.title;
+            }
+        } catch (error) {
+            console.log(error.message)
         }
     }
 
@@ -60,11 +73,30 @@ const ResumeBuilder = () => {
     const activeSection = sections[activeSectionIndex]
 
     useEffect(() => {
-        loadExistingResume().then(r => r.json())
+        loadExistingResume();
     }, []);
 
+    useEffect(() => {
+        console.log('🔄 resumeData updated - Image URL:', resumeData.personal_info?.image);
+    }, [resumeData.personal_info?.image]);
+
     const changeResumeVisibility = async () => {
-        setResumeData({...resumeData, public: !resumeData.public})
+       try {
+           const formData = new FormData();
+           formData.append('resumeId', resumeId);
+           formData.append("resumeData", JSON.stringify({...resumeData, public: !resumeData.public}));
+
+           const { data } = await api.put('/api/resumes/update', formData, {
+               headers: {
+                   Authorization: `Bearer ${token}`
+               }
+           });
+           setResumeData({...resumeData, public: !resumeData.public});
+           toast.success(data.message)
+
+       } catch (error) {
+           console.error('Error saving resume:',error)
+       }
     }
 
     const handleShare = () => {
@@ -82,6 +114,61 @@ const ResumeBuilder = () => {
 
     const handleDownload = () => {
         window.print();
+    }
+
+    const saveResume = async () => {
+        try {
+
+            let updatedResumeData = structuredClone(resumeData);
+            const formData = new FormData();
+
+            // Append basic data
+            formData.append('resumeId', resumeId);
+
+            // Handle image properly
+            if (updatedResumeData.personal_info?.image instanceof File) {
+                formData.append('image', updatedResumeData.personal_info.image);
+                const resumeDataToSend = structuredClone(updatedResumeData);
+                delete resumeDataToSend.personal_info.image;
+                formData.append('resumeData', JSON.stringify(resumeDataToSend));
+
+            } else {
+                formData.append('resumeData', JSON.stringify(updatedResumeData));
+            }
+
+            if (removeBackground) {
+                formData.append('removeBackground', 'yes');
+            }
+
+            const { data } = await api.put('/api/resumes/update', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
+
+            console.log('✅ Save successful:', data.message);
+            console.log('🔄 Response resume data:', data.resume);
+
+            // ✅ CRITICAL FIX: Update local state with the response from backend
+            // This ensures we have the latest data including the new image URL
+            if (data.resume) {
+                setResumeData(data.resume);
+                console.log('✅ Updated local state with backend response');
+            } else {
+                // Fallback: if no resume in response, update with our local data
+                // but this might not have the new image URL
+                setResumeData(updatedResumeData);
+                console.log('⚠️ Using local data (may not have new image URL)');
+            }
+
+            toast.success(data.message);
+
+        } catch (error) {
+            console.error('❌ Error saving resume:', error);
+            console.error('❌ Error response:', error.response?.data);
+            toast.error(error?.response?.data?.message || 'Failed to save resume');
+        }
     }
 
     return (
@@ -194,7 +281,7 @@ const ResumeBuilder = () => {
                                 )}
                             </div>
 
-                            <button className='ring-green-300 text-green-600 ring hover:ring-green-400 rounded-md px-6 py-2 mt-6 text-sm bg-gradient-to-br from-green-100 to-green-200 transition-all'>
+                            <button onClick={()=> {toast.promise(saveResume, {loading: 'Saving'}).then(r => r.json())}} className='ring-green-300 text-green-600 ring hover:ring-green-400 rounded-md px-6 py-2 mt-6 text-sm bg-gradient-to-br from-green-100 to-green-200 transition-all'>
                                 Save Changes
                             </button>
                         </div>

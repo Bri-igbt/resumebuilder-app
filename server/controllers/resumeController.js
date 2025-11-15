@@ -74,32 +74,58 @@ export const getPublicResumeById = async (req, res) => {
 
 //controller for updating a resume
 //PUT: /api/resumes/update
-export const updateResume = async (res, req) => {
+export const updateResume = async (req, res) => {
     try {
         const userId = req.userId;
-        const {resumeId, resumeData, removeBackground} = req.body;
+        const { resumeId, resumeData, removeBackground } = req.body;
         const image = req.file;
 
-        let resumeDataCopy = JSON.parse(resumeData);
+        let resumeDataCopy;
+        try {
+            resumeDataCopy = typeof resumeData === 'string' ?
+                JSON.parse(resumeData) : resumeData;
 
-        if (image) {
-            const imageBufferData = fs.createReadStream(image.path);
-
-            const response = await imageKit.files.upload({
-                file: imageBufferData,
-                fileName: 'resume.png',
-                folder: 'user-resumes',
-                transformation: {
-                    pre: 'w-300, h-300, fo-face, z-0.75' + (removeBackground ? ',e-bgremove' : '')
-                }
-            });
-            resumeDataCopy.personal_info.image = response.url;
+        } catch (parseError) {
+            return res.status(400).json({ message: 'Invalid resume data format' });
         }
-        const resume = await Resume.findByIdAndUpdate({ userId, _id: resumeId }, resumeDataCopy, {new: true});
 
-        return res.status(200).json({ message: 'Saved successfully', resume });
+        // Handle image upload
+        if (image && image.buffer) {
+            try {
+                const response = await imageKit.upload({
+                    file: image.buffer,
+                    fileName: `resume-${resumeId}-${Date.now()}.${image.mimetype.split('/')[1] || 'png'}`,
+                    folder: '/user-resumes',
+                    useUniqueFileName: true,
+                });
+
+                resumeDataCopy.personal_info = {
+                    ...resumeDataCopy.personal_info,
+                    image: response.url
+                };
+
+            } catch (uploadError) {
+                console.error('Image upload failed:', uploadError.message);
+            }
+        } else {
+            console.log(' No image to upload, keeping existing personal_info');
+        }
+
+        console.log('Final data to save - personal_info:', resumeDataCopy.personal_info);
+
+        // Update database - use $set to ensure proper merging
+        const resume = await Resume.findOneAndUpdate(
+            { userId, _id: resumeId },
+            { $set: resumeDataCopy },
+            { new: true, runValidators: true }
+        );
+
+        return res.status(200).json({
+            message: 'Saved successfully',
+            resume: resume
+        });
 
     } catch (error) {
-        return res.status(400).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 }

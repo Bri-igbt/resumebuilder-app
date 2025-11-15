@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import {BriefcaseBusiness, GlobeIcon, Icon, Linkedin, Mail, MapPin, Phone, User} from "lucide-react";
 
 const PersonalInfoForm = ({ data, onChange, removeBackground, setRemoveBackground }) => {
@@ -15,6 +15,20 @@ const PersonalInfoForm = ({ data, onChange, removeBackground, setRemoveBackgroun
         { key: 'linkedin', label: 'LinkedIn Profile', icon: Linkedin, type: 'url' },
         { key: 'website', label: 'Personal Website', icon: GlobeIcon, type: 'url' },
     ]
+
+    const getImageUrl = (image) => {
+        if (typeof image === 'string') {
+            return image; // This is the URL from ImageKit
+        } else if (image instanceof File) {
+            return URL.createObjectURL(image); // Local file preview
+        }
+        return '';
+    };
+
+    const isNewImage = (image) => {
+        return image instanceof File;
+    };
+
     return (
         <div>
             <h3 className='text-lg font-semibold text-gray-900'>Personal Information</h3>
@@ -23,15 +37,19 @@ const PersonalInfoForm = ({ data, onChange, removeBackground, setRemoveBackgroun
                 <label>
                     {data.image ? (
                         <img
-                            src={typeof data.image === 'string' ? data.image : URL.createObjectURL( data.image)}
+                            src={getImageUrl(data.image)}
                             alt="user-image"
                             className="w-16 h-16 rounded-full object-cover mt-5 ring ring-slate-300 hover:opacity-80"
+                            onError={(e) => {
+                                console.error('❌ Image failed to load:', data.image);
+                                e.target.style.display = 'none';
+                            }}
                         />
                     ) : (
-                         <div className='inline-flex items-center gap-2 mt-5 text-slate-600 hover:text-slate-700 cursor-pointer'>
-                             <User className='size-10 p-2.5 border rounded-full' />
-                             upload user image
-                         </div>
+                        <div className='inline-flex items-center gap-2 mt-5 text-slate-600 hover:text-slate-700 cursor-pointer'>
+                            <User className='size-10 p-2.5 border rounded-full' />
+                            upload user image
+                        </div>
                     )}
                     <input
                         type='file'
@@ -41,7 +59,7 @@ const PersonalInfoForm = ({ data, onChange, removeBackground, setRemoveBackgroun
                     />
                 </label>
 
-                {typeof data.image === 'object' && (
+                {isNewImage(data.image) && (
                     <div className='flex flex-col gap-1 pl-4 text-sm'>
                         <p>Remove Background</p>
                         <label className='relative inline-flex items-center cursor-pointer text-gray-900 gap-3'>
