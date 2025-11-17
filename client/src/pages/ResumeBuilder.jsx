@@ -30,6 +30,7 @@ const ResumeBuilder = () => {
     const { token } = useSelector(state => state.auth)
     const [activeSectionIndex, setActiveSectionIndex] = useState(0)
     const [removeBackground, setRemoveBackground] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     const [resumeData, setResumeData] = useState({
         _id: '',
@@ -76,10 +77,6 @@ const ResumeBuilder = () => {
         loadExistingResume();
     }, []);
 
-    useEffect(() => {
-        console.log('🔄 resumeData updated - Image URL:', resumeData.personal_info?.image);
-    }, [resumeData.personal_info?.image]);
-
     const changeResumeVisibility = async () => {
        try {
            const formData = new FormData();
@@ -117,57 +114,64 @@ const ResumeBuilder = () => {
     }
 
     const saveResume = async () => {
-        try {
+        if (isSaving) return;
+        setIsSaving(true);
 
+        try {
             let updatedResumeData = structuredClone(resumeData);
             const formData = new FormData();
 
-            // Append basic data
-            formData.append('resumeId', resumeId);
+            if (!resumeId) {
+                toast.error('Resume ID is missing');
+                setIsSaving(false);
+                return;
+            }
 
-            // Handle image properly
-            if (updatedResumeData.personal_info?.image instanceof File) {
-                formData.append('image', updatedResumeData.personal_info.image);
+            formData.append('resumeId', resumeId);
+            const currentImage = updatedResumeData.personal_info?.image;
+
+            if (currentImage instanceof File) {
+                formData.append('image', currentImage);
+
+                // Remove the File object from resume data
                 const resumeDataToSend = structuredClone(updatedResumeData);
                 delete resumeDataToSend.personal_info.image;
                 formData.append('resumeData', JSON.stringify(resumeDataToSend));
 
             } else {
+                // No new image, send the complete resume data
                 formData.append('resumeData', JSON.stringify(updatedResumeData));
             }
 
+            // Always send removeBackground (yes/no)
             if (removeBackground) {
                 formData.append('removeBackground', 'yes');
+            } else {
+                formData.append('removeBackground', 'no');
             }
 
-            const { data } = await api.put('/api/resumes/update', formData, {
+            const response = await api.put('/api/resumes/update', formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data',
-                }
+                },
+                timeout: 30000
             });
 
-            console.log('✅ Save successful:', data.message);
-            console.log('🔄 Response resume data:', data.resume);
+            if (response.status >= 200 && response.status < 300) {
+                if (response.data.resume) {
+                    setResumeData(response.data.resume);
+                    toast.success('Resume saved successfully!');
 
-            // ✅ CRITICAL FIX: Update local state with the response from backend
-            // This ensures we have the latest data including the new image URL
-            if (data.resume) {
-                setResumeData(data.resume);
-                console.log('✅ Updated local state with backend response');
+                }
             } else {
-                // Fallback: if no resume in response, update with our local data
-                // but this might not have the new image URL
-                setResumeData(updatedResumeData);
-                console.log('⚠️ Using local data (may not have new image URL)');
+                throw new Error(`Request failed with status ${response.status}`);
             }
 
-            toast.success(data.message);
-
         } catch (error) {
-            console.error('❌ Error saving resume:', error);
-            console.error('❌ Error response:', error.response?.data);
             toast.error(error?.response?.data?.message || 'Failed to save resume');
+        } finally {
+            setIsSaving(false);
         }
     }
 
@@ -233,8 +237,11 @@ const ResumeBuilder = () => {
                             <div className='space-y-6'>
                                 {activeSection.id === 'personal' && (
                                     <PersonalInfoForm
-                                        data={resumeData.personal_info}
-                                        onChange={(data) => setResumeData(prev => ({...prev, personal_info: data}))}
+                                        data={resumeData.personal_info} // Ensure data is never undefined
+                                        onChange={(data) => setResumeData(prev => ({
+                                            ...prev,
+                                            personal_info: { ...prev.personal_info, ...data }
+                                        }))}
                                         removeBackground={removeBackground}
                                         setRemoveBackground={setRemoveBackground}
                                     />

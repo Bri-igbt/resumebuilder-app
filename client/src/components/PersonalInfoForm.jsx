@@ -41,8 +41,7 @@ const PersonalInfoForm = ({ data, onChange, removeBackground, setRemoveBackgroun
                             alt="user-image"
                             className="w-16 h-16 rounded-full object-cover mt-5 ring ring-slate-300 hover:opacity-80"
                             onError={(e) => {
-                                console.error('❌ Image failed to load:', data.image);
-                                e.target.style.display = 'none';
+                                console.error(data.image);
                             }}
                         />
                     ) : (
@@ -73,6 +72,14 @@ const PersonalInfoForm = ({ data, onChange, removeBackground, setRemoveBackgroun
                                 <span className='dot absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-4'></span>
                             </div>
                         </label>
+                        {removeBackground && (
+                            <div className="text-xs">
+                                <p className="text-blue-600">🔄 Background removal requested</p>
+                                <p className="text-gray-500 mt-1">
+                                    This feature is experimental and may require a premium ImageKit plan
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

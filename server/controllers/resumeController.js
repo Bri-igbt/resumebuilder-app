@@ -80,11 +80,15 @@ export const updateResume = async (req, res) => {
         const { resumeId, resumeData, removeBackground } = req.body;
         const image = req.file;
 
+        // Validate resumeId
+        if (!resumeId || resumeId.trim() === '') {
+            return res.status(400).json({ message: 'Resume ID is required' });
+        }
+
         let resumeDataCopy;
         try {
             resumeDataCopy = typeof resumeData === 'string' ?
                 JSON.parse(resumeData) : resumeData;
-
         } catch (parseError) {
             return res.status(400).json({ message: 'Invalid resume data format' });
         }
@@ -92,33 +96,66 @@ export const updateResume = async (req, res) => {
         // Handle image upload
         if (image && image.buffer) {
             try {
-                const response = await imageKit.upload({
+                const uploadOptions = {
                     file: image.buffer,
                     fileName: `resume-${resumeId}-${Date.now()}.${image.mimetype.split('/')[1] || 'png'}`,
                     folder: '/user-resumes',
                     useUniqueFileName: true,
-                });
+                };
 
+                // Add background removal transformation if requested
+                if (removeBackground === 'yes') {
+                    uploadOptions.transformations = [
+                        {
+                            pre: "l-bg-removal"
+                        }
+                    ];
+                }
+
+                const response = await imageKit.upload(uploadOptions);
+
+                // Update personal_info with the new image URL
                 resumeDataCopy.personal_info = {
                     ...resumeDataCopy.personal_info,
                     image: response.url
                 };
 
             } catch (uploadError) {
-                console.error('Image upload failed:', uploadError.message);
+                console.error('ImageKit upload failed:', uploadError.message);
+
+                // Fallback: upload without background removal
+                try {
+                    const fallbackOptions = {
+                        file: image.buffer,
+                        fileName: `resume-${resumeId}-${Date.now()}.${image.mimetype.split('/')[1] || 'png'}`,
+                        folder: '/user-resumes',
+                        useUniqueFileName: true,
+                    };
+
+                    const fallbackResponse = await imageKit.upload(fallbackOptions);
+
+                    resumeDataCopy.personal_info = {
+                        ...resumeDataCopy.personal_info,
+                        image: fallbackResponse.url
+                    };
+
+                } catch (fallbackError) {
+                    console.error('Fallback upload failed:', fallbackError.message);
+                    // If both attempts fail, don't update the image
+                }
             }
-        } else {
-            console.log(' No image to upload, keeping existing personal_info');
         }
 
-        console.log('Final data to save - personal_info:', resumeDataCopy.personal_info);
-
-        // Update database - use $set to ensure proper merging
+        // Update database
         const resume = await Resume.findOneAndUpdate(
             { userId, _id: resumeId },
             { $set: resumeDataCopy },
             { new: true, runValidators: true }
         );
+
+        if (!resume) {
+            return res.status(404).json({ message: 'Resume not found' });
+        }
 
         return res.status(200).json({
             message: 'Saved successfully',
@@ -126,6 +163,13 @@ export const updateResume = async (req, res) => {
         });
 
     } catch (error) {
+        console.error('Update resume error:', error);
+
+        // Handle specific MongoDB errors
+        if (error.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid resume ID format' });
+        }
+
         return res.status(500).json({ message: error.message });
     }
 }
