@@ -4,15 +4,18 @@ import {Plus, Sparkles, X} from "lucide-react";
 const SkillsForm = ({ data, onChange }) => {
     const [newSkill, setNewSkill] = useState('');
 
+    // Ensure data is always an array
+    const skills = Array.isArray(data) ? data : [];
+
     const addSkill = () => {
-       if (newSkill.trim() && !data.includes(newSkill.trim())) {
-            onChange([...data, newSkill.trim()]);
+        if (newSkill.trim() && !skills.includes(newSkill.trim())) {
+            onChange([...skills, newSkill.trim()]);
             setNewSkill('');
-       }
+        }
     }
 
     const removeSkill = (index) => {
-        onChange(data.filter((_, i)=> i !== index));
+        onChange(skills.filter((_, i) => i !== index));
     }
 
     const handleKeyPress = (e) => {
@@ -36,7 +39,7 @@ const SkillsForm = ({ data, onChange }) => {
                     onChange={(e) => setNewSkill(e.target.value)}
                     onKeyDown={handleKeyPress}
                     placeholder='Enter a skill'
-                    className='flex-1 py-2 px-3 text-sm'
+                    className='flex-1 py-2 px-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                 />
                 <button
                     onClick={addSkill}
@@ -48,12 +51,16 @@ const SkillsForm = ({ data, onChange }) => {
                 </button>
             </div>
 
-            {data.length > 0 ? (
+            {skills.length > 0 ? (
                 <div className='flex flex-wrap gap-2'>
-                    {data.map((skill, index) => (
+                    {skills.map((skill, index) => (
                         <span key={index} className='flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full'>
                             {skill}
-                            <button onClick={() => removeSkill(index)} className='ml-1 hover:bg-blue-200 rounded-full transition-colors p-0.5'>
+                            <button
+                                onClick={() => removeSkill(index)}
+                                className='ml-1 hover:bg-blue-200 rounded-full transition-colors p-0.5'
+                                type="button"
+                            >
                                 <X className='w-3 h-3'/>
                             </button>
                         </span>
@@ -65,8 +72,7 @@ const SkillsForm = ({ data, onChange }) => {
                     <p>No skills added yet.</p>
                     <p className='text-sm'>Add your technical and soft skills above.</p>
                 </div>
-                )
-            }
+            )}
 
             <div className='bg-blue-50 p-3 rounded-lg'>
                 <p className='text-sm text-blue-800'>
@@ -77,4 +83,5 @@ const SkillsForm = ({ data, onChange }) => {
         </div>
     )
 }
-export default SkillsForm
+
+export default SkillsForm;

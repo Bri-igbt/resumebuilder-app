@@ -35,7 +35,7 @@ export const enhanceProfessionalSummary = async (req, res) => {
 
 // controller for enchanting a resume's job description
 //POST: /api/ai/enhance-job-desc
-export const enhanceJobDescription = async (res, req) => {
+export const enhanceJobDescription = async (req, res) => {
     try {
         const { userContent } = req.body;
 

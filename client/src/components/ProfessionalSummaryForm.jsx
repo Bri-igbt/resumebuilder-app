@@ -1,7 +1,33 @@
-import React from 'react'
-import {Sparkles} from "lucide-react";
+import React, {useState} from 'react'
+import {Loader2, Sparkles} from "lucide-react";
+import {useSelector} from "react-redux";
+import api from "../configs/api.js";
+import toast from "react-hot-toast";
 
 const ProfessionalSummaryForm = ({ data, onChange, setResumeData }) => {
+    const { token } = useSelector(state => state.auth)
+    const [isGenerating, setIsGenerating] = useState(false)
+
+    const generateSummary = async () => {
+        try {
+            setIsGenerating(true)
+            const prompt = `enhance my professional summary "${data}"`;
+
+            // Fix: change 'userContext' to 'userContent'
+            const response = await api.post('/api/ai/enhance-pro-sum', {userContent: prompt}, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+            setResumeData(prev => ({...prev, professional_summary: response.data.enhancedContent}))
+        } catch (e) {
+            toast.error(e?.response?.data?.message || e.message)
+        } finally {
+            setIsGenerating(false)
+        }
+    }
+
     return (
         <div className='space-y-4'>
             <div className='flex items-center justify-between'>
@@ -10,9 +36,17 @@ const ProfessionalSummaryForm = ({ data, onChange, setResumeData }) => {
                     <p className='text-sm text-gray-500'>Add summary for your resume here</p>
                 </div>
 
-                <button className='flex items-center gap-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors disabled:opacity-50'>
-                    <Sparkles className='size-4'/>
-                    AI Enhance
+                <button
+                    disabled={isGenerating}
+                    onClick={generateSummary}
+                    className='flex items-center gap-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors disabled:opacity-50'
+                >
+                    {isGenerating ? (
+                        <Loader2 className='animate-spin size-4'/>
+                    ) : (
+                        <Sparkles className='size-4'/>
+                    )}
+                    {isGenerating ? 'Enhancing...' : 'AI Enhance'}
                 </button>
             </div>
 

@@ -161,7 +161,7 @@ const ResumeBuilder = () => {
             if (response.status >= 200 && response.status < 300) {
                 if (response.data.resume) {
                     setResumeData(response.data.resume);
-                    toast.success('Resume saved successfully!');
+                    toast.success('Saved successfully!');
 
                 }
             } else {
@@ -330,7 +330,7 @@ const ResumeBuilder = () => {
                             </div>
                         </div>
 
-                        <ResumePreview data={resumeData} template={resumeData.template} accentColor={resumeData.accent_color}  />
+                        <ResumePreview data={resumeData} template={resumeData.template} accent_color={resumeData.accent_color}  />
                     </div>
                 </div>
             </div>

@@ -60,15 +60,29 @@ export const getResumeById = async (req, res) => {
 //GET: /api/resumes/public
 export const getPublicResumeById = async (req, res) => {
     try {
-        const {resumeId} = res.params;
-        const resume = await Resume.findOne({public: true, _id: resumeId })
+        const { resumeId } = req.params;
+
+        // Validate resumeId
+        if (!resumeId) {
+            return res.status(400).json({ message: 'Resume ID is required' });
+        }
+
+        const resume = await Resume.findOne({ public: true, _id: resumeId })
 
         if (!resume) {
             return res.status(404).json({ message: 'Resume not found' });
         }
+
         return res.status(200).json({ resume });
     } catch (error) {
-        return res.status(400).json({ message: error.message });
+        console.error('Get public resume error:', error);
+
+        // Handle specific MongoDB errors
+        if (error.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid resume ID format' });
+        }
+
+        return res.status(500).json({ message: error.message });
     }
 }
 
