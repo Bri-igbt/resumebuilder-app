@@ -7,29 +7,39 @@ export const enhanceProfessionalSummary = async (req, res) => {
     try {
         const { userContent } = req.body;
 
-        if(!userContent) {
+        if (!userContent || typeof userContent !== 'string' || userContent.trim() === '') {
             return res.status(400).json({ message: 'User content is required' });
         }
 
+        const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+
         const response = await ai.chat.completions.create({
-            model: process.env.OPENAI_MODEL,
+            model,
             messages: [
                 {
                     role: "system",
-                    content: "You are an expert in resume writing. Your task is to enhance the professional summary of a resume. " +
-                        "The summary should be only in 1-2 sentences also highlighting key skills, experience, and careers objectives." +
-                        " Make it compelling and ATS friendly, and only return text no option or anything else."
+                    content:
+                        "You are an expert in resume writing. Your task is to enhance the professional summary of a resume. " +
+                        "The summary should be only in 1-2 sentences also highlighting key skills, experience, and career objectives. " +
+                        "Make it compelling and ATS friendly, and only return text."
                 },
                 {
                     role: "user",
-                    content:userContent,
+                    content: userContent.trim(),
                 },
             ],
-        })
-        const enhancedContent = response.choices[0].message.content.trim();
-        return res.status(200).json({ enhancedContent });
+        });
+
+        const choice = Array.isArray(response.choices) && response.choices[0];
+        const content = choice && choice.message && choice.message.content ? choice.message.content.trim() : '';
+        if (!content) {
+            return res.status(502).json({ message: 'AI did not return any content' });
+        }
+
+        return res.status(200).json({ enhancedContent: content });
     } catch (error) {
-        return res.status(400).json({ message: error.message });
+        const status = error.status || 500;
+        return res.status(status).json({ message: error.message || 'Failed to enhance professional summary' });
     }
 };
 
@@ -39,31 +49,40 @@ export const enhanceJobDescription = async (req, res) => {
     try {
         const { userContent } = req.body;
 
-        if(!userContent) {
-            return res.status(400).json({ message: 'Missing required field' });
+        if (!userContent || typeof userContent !== 'string' || userContent.trim() === '') {
+            return res.status(400).json({ message: 'User content is required' });
         }
 
+        const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+
         const response = await ai.chat.completions.create({
-            model: process.env.OPENAI_MODEL,
+            model,
             messages: [
                 {
                     role: "system",
-                    content: "You are an expert in resume writing. Your task is to enhance the job description of a resume. " +
-                        "The job description should be only in 1-2 sentences also highlighting key responsibility and achievement" +
-                        "Use action verbs and quantifiable results where possible." +
-                        " Make it compelling and ATS friendly, and only return text no option or anything else."
+                    content:
+                        "You are an expert in resume writing. Your task is to enhance the job description of a resume. " +
+                        "The job description should be only in 1-2 sentences, highlighting key responsibilities and achievements. " +
+                        "Use action verbs and quantifiable results where possible. Make it compelling and ATS friendly, and only return text."
                 },
                 {
                     role: "user",
-                    content:userContent,
+                    content: userContent.trim(),
                 },
             ],
-        })
-        const enhancedContent = response.choices[0].message.content.trim();
-        return res.status(200).json({ enhancedContent });
+        });
+
+        const choice = Array.isArray(response.choices) && response.choices[0];
+        const content = choice && choice.message && choice.message.content ? choice.message.content.trim() : '';
+        if (!content) {
+            return res.status(502).json({ message: 'AI did not return any content' });
+        }
+
+        return res.status(200).json({ enhancedContent: content });
 
     } catch (error) {
-        return res.status(400).json({ message: error.message });
+        const status = error.status || 500;
+        return res.status(status).json({ message: error.message || 'Failed to enhance job description' });
     }
 }
 

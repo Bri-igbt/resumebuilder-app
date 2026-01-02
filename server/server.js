@@ -13,7 +13,12 @@ await connectDB();
 
 app.use(express.json());
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080','https://resumebuilder-app-eight.vercel.app/'],
+    origin: [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://localhost:8080',
+        'https://resumifybuilder.netlify.app'
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
