@@ -11,7 +11,7 @@ export default defineConfig({
         port: 5173,
         proxy: {
             '/api': {
-                target: 'https://resumebuilder-app-eight.vercel.app/',
+                target: 'https://resumebuilder-app-delta.vercel.app/',
                 changeOrigin: true,
                 secure: false,
             },
