@@ -7,4 +7,14 @@ export default defineConfig({
         react(),
         tailwindcss(),
     ],
+    server: {
+        port: 5173,
+        proxy: {
+            '/api': {
+                target: 'https://resumebuilder-app-eight.vercel.app/',
+                changeOrigin: true,
+                secure: false,
+            },
+        },
+    },
 })

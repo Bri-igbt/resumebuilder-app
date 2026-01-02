@@ -105,7 +105,7 @@ const EducationForm = ({ data, onChange }) => {
                                 value={education.gpa || ''}
                                 placeholder='GPA (optional)'
                                 onChange={(e)=> updateEducation(index, "gpa", e.target.value)}
-                                className='px-3 py-2 text-sm  border border-gray-200 '
+                                className='px-3 py-2 text-sm  border border-gray-200'
                             />
                         </div>
                     ))}

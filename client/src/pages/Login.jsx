@@ -23,10 +23,9 @@ const Login = () => {
             const { data } = await api.post(`/api/users/${state}`, formData)
             dispatch(login(data))
 
-            // Make sure the token is stored correctly
             if (data.token) {
                 localStorage.setItem('token', data.token);
-                console.log('Token stored:', data.token); // Debug log
+                console.log('Token stored:', data.token);
             }
 
             toast.success("Login Successful")
