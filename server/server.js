@@ -14,7 +14,12 @@ await connectDB();
 
 app.use(express.json());
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080'], // Common frontend ports
+    origin: [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://localhost:8080',
+        'https://resumifybuilder.netlify.app' // deployed frontend
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
